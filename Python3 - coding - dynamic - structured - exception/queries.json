@@ -1,0 +1,33 @@
+{
+  "queries": [
+    {
+      "query": "SELECT 'Tous les produits' as prd , SUM(prix * qte) AS ca FROM ventes;",      
+      "plot_function": "bar",
+      "plot_params": {
+        "x": "prd",
+        "y": "ca",       
+        "title": "Chiffre d'affaires global"
+      }
+    },
+    {
+      "query": "SELECT produit, SUM(prix * qte) AS ca FROM ventes GROUP BY produit;",     
+      "plot_function": "bar",
+      "plot_params": {
+        "x": "produit",
+        "y": "ca",
+        "color": "produit",        
+        "title": "Chiffre d'affaires par produit"
+      }
+    },
+    {
+      "query": "SELECT region, SUM(prix * qte) AS ca FROM ventes GROUP BY region;",      
+      "plot_function": "bar",
+      "plot_params": {
+        "x": "region",
+        "y": "ca",
+        "color": "region",        
+        "title": "Chiffre d'affaires par region"
+      }
+    }
+  ]
+}

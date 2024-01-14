@@ -1,0 +1,72 @@
+import plotly.express as px
+import sqlite3
+import json
+import pandas as pd
+
+def query(conn, params):
+    # Execution de la requete SQL
+    result = pd.read_sql_query(params['query'], conn)
+
+    # Obtenir les paramètres spécifiques de la fonction Plotly Express à partir du fichier JSON
+    plot_params = params.get('plot_params', {})
+
+    # Creation du graphique avec Plotly Express en utilisant la fonction dynamiquement obtenue et les parametres specifies
+    fig = px.bar(result, **plot_params)
+
+    # Affichage du graphique
+    fig.show()
+
+#eof query
+
+# Donnees JSON directement incluses dans le code
+data_json = '''
+{
+  "queries": [
+    {
+      "query": "SELECT 'Tous les produits' as prd , SUM(prix * qte) AS ca FROM ventes;",      
+      "plot_params": {
+        "x": "prd",
+        "y": "ca",       
+        "title": "Chiffre d'affaires global"
+      }
+    },
+    {
+      "query": "SELECT produit, SUM(prix * qte) AS ca FROM ventes GROUP BY produit;",     
+      "plot_params": {
+        "x": "produit",
+        "y": "ca",
+        "color": "produit",        
+        "title": "Chiffre d'affaires par produit"
+      }
+    },
+    {
+      "query": "SELECT region, SUM(prix * qte) AS ca FROM ventes GROUP BY region;",      
+      "plot_params": {
+        "x": "region",
+        "y": "ca",
+        "color": "region",        
+        "title": "Chiffre d'affaires par region"
+      }
+    }
+  ]
+}
+'''
+
+# Conversion de la chaine JSON en objet Python
+data = json.loads(data_json)
+
+# Chargement du fichier CSV depuis le repertoire par défaut
+df = pd.read_csv('ventes.csv')
+
+# Creation d'une connexion à une base de donnees SQLite en memoire
+conn = sqlite3.connect(':memory:')
+
+# Ecriture du DataFrame dans la base de donnees
+df.to_sql('ventes', conn, index=False, if_exists='replace')
+
+# Appel de la fonction query pour chaque structure JSON
+for query_json in data.get("queries", []):
+    query(conn, query_json)
+
+# Fermeture de la connexion
+conn.close()
